@@ -4,6 +4,7 @@ import {
   Entity,
   Generated,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
   VersionColumn,
 } from "typeorm";
@@ -14,10 +15,9 @@ export enum QuestionStatus {
   IN_PROGRESS = "in_progress",
 }
 
-@Entity()
+@Entity("questions")
 export class QuestionEntity {
-  @PrimaryColumn()
-  @Generated("uuid")
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Column()

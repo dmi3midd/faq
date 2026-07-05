@@ -5,13 +5,16 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { QuestionModule } from "./question/question.module";
 import { TopicModule } from "./topic/topic.module";
+import { AnswerModule } from "./answer/answer.module";
 
 @Module({
   imports: [
+    // ConfigModule
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
     }),
+    // TypeOrmModule
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -26,10 +29,13 @@ import { TopicModule } from "./topic/topic.module";
       }),
       inject: [ConfigService],
     }),
+
+    // Modules
     QuestionModule,
     TopicModule,
+    AnswerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
