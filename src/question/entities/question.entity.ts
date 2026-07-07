@@ -2,8 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Generated,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   VersionColumn,
@@ -12,7 +10,7 @@ import {
 export enum QuestionStatus {
   PENDING = "pending",
   RESOLVED = "resolved",
-  IN_PROGRESS = "in_progress",
+  ASSIGNED = "assigned",
 }
 
 @Entity("questions")

@@ -1,15 +1,15 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, IsNull } from "typeorm";
 import { QuestionEntity, QuestionStatus } from "./entities/question.entity";
-import { CreateQuestionDto } from "./dto/create-question.dto";
+import { QuestionNotFoundError } from "../common/errors/question/service.errors";
 
 interface IQuestionService {
-  createQuestion(question: CreateQuestionDto): Promise<void>;
+  createQuestion(
+    email: string,
+    subject: string,
+    message: string,
+  ): Promise<void>;
   getPendingQuestions(): Promise<QuestionEntity[]>;
   getAssignedQuestions(adminId: string): Promise<QuestionEntity[]>;
   assignQuestion(questionId: string, adminId: string): Promise<void>;
@@ -23,8 +23,16 @@ export class QuestionService implements IQuestionService {
     private readonly questionRepository: Repository<QuestionEntity>,
   ) {}
 
-  async createQuestion(question: CreateQuestionDto): Promise<void> {
-    const newQuestion = this.questionRepository.create(question);
+  async createQuestion(
+    email: string,
+    subject: string,
+    message: string,
+  ): Promise<void> {
+    const newQuestion = this.questionRepository.create({
+      email,
+      subject,
+      message,
+    });
     await this.questionRepository.save(newQuestion);
   }
 
@@ -41,7 +49,7 @@ export class QuestionService implements IQuestionService {
     return this.questionRepository.find({
       where: {
         assignedAdminId: adminId,
-        status: QuestionStatus.IN_PROGRESS,
+        status: QuestionStatus.ASSIGNED,
       },
     });
   }
@@ -54,11 +62,11 @@ export class QuestionService implements IQuestionService {
       },
       {
         assignedAdminId: adminId,
-        status: QuestionStatus.IN_PROGRESS,
+        status: QuestionStatus.ASSIGNED,
       },
     );
     if (updateResult.affected === 0) {
-      throw new BadRequestException("Question not found or already assigned");
+      throw new QuestionNotFoundError(questionId, QuestionStatus.ASSIGNED);
     }
   }
 
@@ -66,14 +74,14 @@ export class QuestionService implements IQuestionService {
     const updateResult = await this.questionRepository.update(
       {
         id: questionId,
-        status: QuestionStatus.IN_PROGRESS,
+        status: QuestionStatus.ASSIGNED,
       },
       {
         status: QuestionStatus.RESOLVED,
       },
     );
     if (updateResult.affected === 0) {
-      throw new BadRequestException("Question not found or already resolved");
+      throw new QuestionNotFoundError(questionId, QuestionStatus.RESOLVED);
     }
   }
 }

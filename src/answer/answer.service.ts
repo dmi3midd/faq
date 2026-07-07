@@ -1,19 +1,20 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { AnswerEntity } from "./entities/answer.entity";
 import { QuestionEntity } from "src/question/entities/question.entity";
-import { CreateAnswerDto } from "./dto/create-answer.dto";
 import { HttpService } from "@nestjs/axios";
 import { ConfigService } from "@nestjs/config";
 import { firstValueFrom } from "rxjs";
+import { QuestionNotFoundError } from "src/common/errors/question/service.errors";
+import { FailedToSendEmailError } from "src/common/errors/answer/service.errors";
+
+interface IAnswerService {
+  answer(message: string, questionId: string): Promise<AnswerEntity>;
+}
 
 @Injectable()
-export class AnswerService {
+export class AnswerService implements IAnswerService {
   constructor(
     @InjectRepository(AnswerEntity)
     private readonly answerRepository: Repository<AnswerEntity>,
@@ -23,29 +24,30 @@ export class AnswerService {
     private readonly configService: ConfigService,
   ) {}
 
-  // Create a new answer
-  // Send a new answer in email
-  async answer(answer: CreateAnswerDto): Promise<AnswerEntity> {
+  async answer(message: string, questionId: string): Promise<AnswerEntity> {
     const question = await this.questionRepository.findOne({
-      where: { id: answer.questionId },
+      where: { id: questionId },
     });
     if (!question) {
-      throw new NotFoundException("Question not found");
+      throw new QuestionNotFoundError(questionId);
     }
     const url = this.configService.getOrThrow<string>("EMAIL_SERVICE_URL");
     let resp = await firstValueFrom(
       this.httpService.post(`${url}/send/email`, {
         to: question.email,
         subject: "Answer to your question",
-        body: answer.message,
+        body: message,
       }),
     );
 
     if (resp.status != 202) {
-      throw new InternalServerErrorException("Failed to send email");
+      throw new FailedToSendEmailError(questionId);
     }
 
-    const savedAnswer = await this.answerRepository.save(answer);
+    const savedAnswer = await this.answerRepository.save({
+      message,
+      question,
+    });
     return savedAnswer;
   }
 }

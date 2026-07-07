@@ -1,15 +1,14 @@
-import { Controller, Post, Body } from '@nestjs/common';
-import { AnswerService } from './answer.service';
-import { CreateAnswerDto } from './dto/create-answer.dto';
-import { AnswerEntity } from './entities/answer.entity';
+import { Controller, Post, Body } from "@nestjs/common";
+import { AnswerService } from "./answer.service";
+import { CreateAnswerRequest } from "./dto/create-answer.request";
+import { AnswerEntity } from "./entities/answer.entity";
 
-@Controller('answers')
+@Controller("answers")
 export class AnswerController {
-  constructor(private readonly answerService: AnswerService) { }
+  constructor(private readonly answerService: AnswerService) {}
 
   @Post("/")
-  async answer(@Body() answer: CreateAnswerDto): Promise<AnswerEntity> {
-    return await this.answerService.answer(answer);
+  async answer(@Body() body: CreateAnswerRequest): Promise<AnswerEntity> {
+    return await this.answerService.answer(body.message, body.questionId);
   }
-
 }

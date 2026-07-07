@@ -6,7 +6,7 @@ import {
   Unique,
 } from "typeorm";
 
-@Entity('topics')
+@Entity("topics")
 @Unique(["title"])
 export class TopicEntity {
   @PrimaryGeneratedColumn("uuid")

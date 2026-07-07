@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { TopicEntity } from "./entities/topic.entity";
 import { Repository } from "typeorm";
-import { CreateTopicDto } from "./dto/create-topic.dto";
+import { TopicNotFoundError } from "../common/errors/topic/service.errors";
 
 interface ITopicService {
   getAll(): Promise<TopicEntity[]>;
   getOne(title: string): Promise<TopicEntity>;
-  add(topic: CreateTopicDto): Promise<TopicEntity>;
+  add(title: string, description: string): Promise<TopicEntity>;
   remove(title: string): Promise<void>;
 }
 
@@ -16,7 +16,7 @@ export class TopicService implements ITopicService {
   constructor(
     @InjectRepository(TopicEntity)
     private topicRepository: Repository<TopicEntity>,
-  ) { }
+  ) {}
 
   async getAll(): Promise<TopicEntity[]> {
     return await this.topicRepository.find();
@@ -25,13 +25,13 @@ export class TopicService implements ITopicService {
   async getOne(title: string): Promise<TopicEntity> {
     const topic = await this.topicRepository.findOne({ where: { title } });
     if (!topic) {
-      throw new NotFoundException(`Topic with title "${title}" not found`);
+      throw new TopicNotFoundError(title);
     }
     return topic;
   }
 
-  async add(topic: CreateTopicDto): Promise<TopicEntity> {
-    const newTopic = this.topicRepository.create(topic);
+  async add(title: string, description: string): Promise<TopicEntity> {
+    const newTopic = this.topicRepository.create({ title, description });
     return await this.topicRepository.save(newTopic);
   }
 

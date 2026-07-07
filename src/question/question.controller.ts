@@ -10,16 +10,20 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { QuestionService } from "./question.service";
-import { CreateQuestionDto } from "./dto/create-question.dto";
-import { QuestionStatus } from "./entities/question.entity";
+import { CreateQuestionRequest } from "./dto/create-question.request";
+import { AssignQuestionRequest } from "./dto/assign-question.request";
 
 @Controller("questions")
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
   @Post("/")
-  async sendQuestion(@Body() question: CreateQuestionDto) {
-    await this.questionService.createQuestion(question);
+  async createQuestion(@Body() body: CreateQuestionRequest) {
+    await this.questionService.createQuestion(
+      body.email,
+      body.subject,
+      body.message,
+    );
     return { message: "Question sent successfully" };
   }
 
@@ -36,19 +40,16 @@ export class QuestionController {
     return await this.questionService.getAssignedQuestions(adminId);
   }
 
-  @Put("/:id")
+  @Patch("/assign/:id")
   async assignQuestion(
     @Param("id") id: string,
-    @Body() body: { assignedAdminId: string },
+    @Body() body: AssignQuestionRequest,
   ) {
-    if (!body.assignedAdminId) {
-      throw new BadRequestException("assignedAdminId is required");
-    }
-    await this.questionService.assignQuestion(id, body.assignedAdminId);
+    await this.questionService.assignQuestion(id, body.adminId);
     return { message: "Question assigned successfully" };
   }
 
-  @Patch("/:id")
+  @Patch("/resolve/:id")
   async resolveQuestion(@Param("id") id: string) {
     await this.questionService.resolveQuestion(id);
     return { message: "Question resolved successfully" };
