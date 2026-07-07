@@ -6,7 +6,10 @@ import {
 } from "@nestjs/common";
 import e, { Response } from "express";
 import { TopicNotFoundError } from "../errors/topic/service.errors";
-import { QuestionNotFoundError } from "../errors/question/service.errors";
+import {
+  QuestionNotFoundError,
+  QuestionNotAssignedError,
+} from "../errors/question/service.errors";
 import { FailedToSendEmailError } from "../errors/answer/service.errors";
 
 @Catch()
@@ -25,6 +28,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof QuestionNotFoundError) {
       status = HttpStatus.NOT_FOUND;
+      message = exception.message;
+    }
+
+    if (exception instanceof QuestionNotAssignedError) {
+      status = HttpStatus.BAD_REQUEST;
       message = exception.message;
     }
 

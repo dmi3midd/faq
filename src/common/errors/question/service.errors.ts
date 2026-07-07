@@ -8,3 +8,10 @@ export class QuestionNotFoundError extends Error {
     this.name = "QuestionNotFoundError";
   }
 }
+
+export class QuestionNotAssignedError extends Error {
+  constructor(questionId: string, status: QuestionStatus) {
+    super(`Question ${questionId} is not assigned but ${status}`);
+    this.name = "QuestionNotAssignedError";
+  }
+}

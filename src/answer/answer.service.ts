@@ -6,8 +6,12 @@ import { QuestionEntity } from "src/question/entities/question.entity";
 import { HttpService } from "@nestjs/axios";
 import { ConfigService } from "@nestjs/config";
 import { firstValueFrom } from "rxjs";
-import { QuestionNotFoundError } from "src/common/errors/question/service.errors";
+import {
+  QuestionNotFoundError,
+  QuestionNotAssignedError,
+} from "src/common/errors/question/service.errors";
 import { FailedToSendEmailError } from "src/common/errors/answer/service.errors";
+import { QuestionStatus } from "src/question/entities/question.entity";
 
 interface IAnswerService {
   answer(message: string, questionId: string): Promise<AnswerEntity>;
@@ -30,6 +34,9 @@ export class AnswerService implements IAnswerService {
     });
     if (!question) {
       throw new QuestionNotFoundError(questionId);
+    }
+    if (question.status !== QuestionStatus.ASSIGNED) {
+      throw new QuestionNotAssignedError(questionId, question.status);
     }
     const url = this.configService.getOrThrow<string>("EMAIL_SERVICE_URL");
     let resp = await firstValueFrom(
