@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { QuestionModule } from "./question/question.module";
 import { TopicModule } from "./topic/topic.module";
 import { AnswerModule } from "./answer/answer.module";
-import { AllExceptionsFilter } from "./common/filters/allexception.filter";
+import { AuthModule } from './admin/auth.module';
 
 @Module({
   imports: [
@@ -35,6 +35,7 @@ import { AllExceptionsFilter } from "./common/filters/allexception.filter";
     QuestionModule,
     TopicModule,
     AnswerModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
