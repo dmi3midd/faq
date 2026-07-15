@@ -3,14 +3,21 @@ import {
   Catch,
   ArgumentsHost,
   HttpStatus,
+  HttpException,
 } from "@nestjs/common";
-import e, { Response } from "express";
+import { Response } from "express";
 import { TopicNotFoundError } from "../errors/topic/service.errors";
 import {
   QuestionNotFoundError,
   QuestionNotAssignedError,
 } from "../errors/question/service.errors";
 import { FailedToSendEmailError } from "../errors/answer/service.errors";
+import {
+  AdminAlreadyExistsError,
+  AdminNotFoundError,
+  InvalidPasswordError,
+  AdminInactiveError,
+} from "../errors/auth/service.errors";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -20,6 +27,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = "Internal server error";
+
+    if (exception instanceof HttpException) {
+      status = exception.getStatus();
+      const res = exception.getResponse();
+      message = typeof res === "string" ? res : (res as any).message || exception.message;
+    }
 
     if (exception instanceof TopicNotFoundError) {
       status = HttpStatus.NOT_FOUND;
@@ -38,6 +51,26 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof FailedToSendEmailError) {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
+      message = exception.message;
+    }
+
+    if (exception instanceof AdminAlreadyExistsError) {
+      status = HttpStatus.CONFLICT;
+      message = exception.message;
+    }
+
+    if (exception instanceof AdminNotFoundError) {
+      status = HttpStatus.NOT_FOUND;
+      message = exception.message;
+    }
+
+    if (exception instanceof InvalidPasswordError) {
+      status = HttpStatus.UNAUTHORIZED;
+      message = exception.message;
+    }
+
+    if (exception instanceof AdminInactiveError) {
+      status = HttpStatus.FORBIDDEN;
       message = exception.message;
     }
 

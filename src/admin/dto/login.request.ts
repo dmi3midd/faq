@@ -5,12 +5,7 @@ import {
   Length,
 } from "class-validator";
 
-export class RegistrationRequest {
-  @IsNotEmpty()
-  @IsString()
-  @Length(4, 16)
-  username: string;
-
+export class LoginRequest {
   @IsNotEmpty()
   @IsString()
   @IsEmail()

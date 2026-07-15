@@ -21,6 +21,12 @@ export class AdminEntity {
   })
   password: string;
 
+  @Column({
+    name: "is_active",
+    default: true,
+  })
+  isActive: boolean;
+
   @CreateDateColumn({
     name: "created_at",
   })
