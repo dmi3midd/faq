@@ -4,9 +4,8 @@ import { AppService } from "./app.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { QuestionModule } from "./question/question.module";
-import { TopicModule } from "./topic/topic.module";
 import { AnswerModule } from "./answer/answer.module";
-import { AuthModule } from './admin/auth.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -33,7 +32,6 @@ import { AuthModule } from './admin/auth.module';
 
     // Modules
     QuestionModule,
-    TopicModule,
     AnswerModule,
     AuthModule,
   ],
